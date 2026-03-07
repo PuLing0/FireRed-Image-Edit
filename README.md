@@ -17,7 +17,7 @@
 
 <p align="center">
     🤗 <a href="https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1">HuggingFace</a> |
-    🤖 <a href="https://modelscope.cn/models/FireRedTeam/FireRed-Image-Edit-1.0">ModelScope</a> |
+    🤖 <a href="https://modelscope.cn/models/FireRedTeam/FireRed-Image-Edit-1.1">ModelScope</a> |
     🖥️ <a href="https://huggingface.co/spaces/FireRedTeam/FireRed-Image-Edit-1.1">Demo</a> |
     📄 <a href="https://arxiv.org/abs/2602.13344">Technical Report</a>
 </p>
