@@ -19,7 +19,11 @@ import traceback
 import warnings
 from typing import Any, TYPE_CHECKING
 
-from agent.config import GEMINI_API_KEY, GEMINI_MODEL_NAME, RECAPTION_TARGET_LENGTH
+from agent.config import (
+    RECAPTION_TARGET_LENGTH,
+    get_gemini_config_kwargs,
+    get_gemini_model_name,
+)
 
 if TYPE_CHECKING:
     import google.generativeai as genai
@@ -44,9 +48,9 @@ def _import_genai():
 def _init_gemini() -> Any:
     """Lazily configure the Gemini SDK and return a model instance."""
     genai = _import_genai()
-    genai.configure(api_key=GEMINI_API_KEY)
+    genai.configure(**get_gemini_config_kwargs())
     return genai.GenerativeModel(
-        model_name=GEMINI_MODEL_NAME,
+        model_name=get_gemini_model_name(),
         generation_config={
             "temperature": 0.4,
             "max_output_tokens": 4096,

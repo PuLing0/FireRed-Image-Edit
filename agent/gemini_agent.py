@@ -17,7 +17,7 @@ from typing import Any, TYPE_CHECKING
 
 from PIL import Image
 
-from agent.config import GEMINI_API_KEY, GEMINI_MODEL_NAME
+from agent.config import get_gemini_config_kwargs, get_gemini_model_name
 
 if TYPE_CHECKING:
     import google.generativeai as genai
@@ -102,9 +102,9 @@ def _get_crop_tool() -> Any:
 def _init_model() -> Any:
     """Return a Gemini model configured with the crop tool."""
     genai = _import_genai()
-    genai.configure(api_key=GEMINI_API_KEY)
+    genai.configure(**get_gemini_config_kwargs())
     return genai.GenerativeModel(
-        model_name=GEMINI_MODEL_NAME,
+        model_name=get_gemini_model_name(),
         generation_config={
             "temperature": 0.1,
             "max_output_tokens": 4096,
