@@ -8,6 +8,7 @@
   <a href="https://huggingface.co/FireRedTeam/FireRed-Image-Edit-LoRA-Zoo" target="_blank"><img alt="Hugging Face Model" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-FireRed--Image--Edit--LoRA--Zoo-red" style="display: inline-block;"/></a>
   <a href="https://huggingface.co/spaces/FireRedTeam/FireRed-Image-Edit-1.1" target="_blank"><img alt="HF Demo" src="https://img.shields.io/badge/%F0%9F%A4%97%20HF%20Demo-FireRed--Image--Edit--1.1-red" style="display: inline-block;"/></a>
   <a href="https://huggingface.co/datasets/FireRedTeam/REDEdit-Bench" target="_blank"><img alt="Hugging Face Dataset" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-REDEdit--Bench-ffc107?color=ffc107&logoColor=white" style="display: inline-block;"/></a>
+  <a href="https://modelscope.cn/aigc/modelTraining" target="_blank"><img alt="ModelScope Model" src="https://img.shields.io/badge/%F0%9F%A4%96%20ModelScope-FireRed--Image--Edit--1.1--Lora--Training-624aff" style="display: inline-block;"/></a>
   <a href="https://modelscope.cn/models/FireRedTeam/FireRed-Image-Edit-1.1" target="_blank"><img alt="ModelScope Model" src="https://img.shields.io/badge/%F0%9F%A4%96%20ModelScope-FireRed--Image--Edit--1.1-624aff" style="display: inline-block;"/></a>
   <a href="https://modelscope.cn/models/FireRedTeam/FireRed-Image-Edit-1.0" target="_blank"><img alt="ModelScope Model" src="https://img.shields.io/badge/%F0%9F%A4%96%20ModelScope-FireRed--Image--Edit--1.0-624aff" style="display: inline-block;"/></a>
   <a href="https://modelscope.cn/studios/FireRedTeam/FireRed-Image-Edit-1.1" target="_blank"><img alt="MS Demo" src="https://img.shields.io/badge/%F0%9F%A4%96%20MS%20Demo-FireRed--Image--Edit--1.1-624aff" style="display: inline-block;"/></a>
@@ -51,6 +52,7 @@
 - 🏗️ **Backbone-Agnostic Architecture**: Editing capabilities injected through full Pretrain → SFT → RL pipeline, transferable to any T2I foundation model.
 
 ## 📰 News
+- 2026.03.25: [ModelScope](https://modelscope.cn/aigc/modelTraining) now supports LoRA training for FireRed-image-edit.
 - 2026.03.09: We have released **REDEdit-Bench**, a new image editing benchmark. REDEdit-Bench covers more diverse scenarios and editing instructions that better align with human language, providing a more comprehensive and realistic evaluation for image editing tasks.
 - 2026.03.03: We release FireRed-Image-Edit-1.1, which, based on the FireRed-Image-Edit-1.0 foundation model, optimizes portrait consistency, multi-element fusion, stylized text reference, and portrait makeup effects.
 - 2026.03.01: We offer a lightweight inference script (including distilled [Lora](https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.0-ComfyUI/blob/main/FireRed-Image-Edit-1.0-Lightning-8steps-v1.0.safetensors), quantization, db_cache, and static compilation), now requiring only **30GB VRAM** and **~4.5s/sample**. 🚀 Try it by simply running `python inference.py --optimized True`.
