@@ -1,11 +1,19 @@
-"""FireRed Agent: Multi-image preprocessing agent for FireRed-Image-Edit.
+"""FireRed Agent package.
 
-When users provide more than 3 images, this agent automatically:
-1. Uses Gemini function calling to detect ROI regions in each image
-2. Crops, resizes, and stitches images into 2-3 composite images
-3. Rewrites (recaptions) user instructions to match the new image layout
+Exports:
+1. ``AgentPipeline`` – legacy lightweight pre-processing agent
+2. ``AgentRuntime`` – comprehensive planning/tool/workspace/critic agent
 """
 
 from agent.pipeline import AgentPipeline
+from agent.runtime import AgentRuntime
+from agent.runtime_types import AgentRuntimeOptions
+from agent.tools import FireRedEditConfig, FireRedEditTool
 
-__all__ = ["AgentPipeline"]
+__all__ = [
+    "AgentPipeline",
+    "AgentRuntime",
+    "AgentRuntimeOptions",
+    "FireRedEditConfig",
+    "FireRedEditTool",
+]

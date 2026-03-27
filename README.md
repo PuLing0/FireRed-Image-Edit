@@ -177,7 +177,10 @@ python inference.py \
 
 ## 🤖 Agent
 
-The Agent module provides **Recaption & Multi-Image Preprocessing** capabilities.
+The Agent module now provides two modes:
+
+- **Legacy mode** – Recaption & multi-image preprocessing only
+- **Runtime mode** – A closed-loop agent with planning → tool routing → workspace updates → critic verification → automatic repair
 
 FireRed-Image-Edit natively supports **1–3** input images. When users need to edit with **more than 3 images**, the built-in **Agent** module automatically:
 
@@ -193,6 +196,25 @@ export GEMINI_API_KEY="your-gemini-api-key"
 ```
 
 > **Note:** The Gemini API is **not required**. Without it, the Agent will still perform ROI detection and image stitching normally, but will skip the instruction rewriting step. Setting a Gemini API key is recommended for best results.
+
+### Runtime Agent (closed loop)
+
+To run the new comprehensive agent runtime, use:
+
+```bash
+python inference.py \
+    --agent_mode runtime \
+    --input_image ./examples/edit_example.png \
+    --prompt "在书本封面Python的下方，添加一行英文文字2nd Edition" \
+    --output_image output_edit.png
+```
+
+Useful runtime flags:
+
+- `--agent_max_repair_rounds`: maximum automatic repair rounds
+- `--agent_max_plan_iterations`: overall planner iterations
+- `--disable_vlm_critic`: disable Gemini-backed final critic
+- `--disable_input_understanding`: skip the optional image-understanding step
 
 
 

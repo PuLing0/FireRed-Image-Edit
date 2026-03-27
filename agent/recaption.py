@@ -190,6 +190,7 @@ def recaption(
     original_instruction: str,
     group_indices: list[list[int]],
     target_length: int = RECAPTION_TARGET_LENGTH,
+    additional_guidance: str | None = None,
 ) -> str:
     """Rewrite *original_instruction* with updated image references and richer
     detail.
@@ -204,6 +205,8 @@ def recaption(
         into one composite image.
     target_length:
         Desired length of the rewritten instruction (words or characters).
+    additional_guidance:
+        Optional critic / repair notes to inject into the rewrite request.
 
     Returns
     -------
@@ -226,6 +229,11 @@ def recaption(
         f"{mapping_desc}\n\n"
         f"Please output the rewritten instruction (approximately {target_length} words/characters)."
     )
+    if additional_guidance:
+        user_prompt += (
+            "\n\nAdditional repair guidance from the agent critic:\n"
+            f"{additional_guidance.strip()}"
+        )
 
     try:
         model = _init_gemini()

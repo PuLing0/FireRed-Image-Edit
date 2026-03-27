@@ -86,6 +86,36 @@ def parse_args() -> argparse.Namespace:
              "Requires GEMINI_API_KEY environment variable.",
     )
     parser.add_argument(
+        "--agent_mode",
+        type=str,
+        choices=["legacy", "runtime"],
+        default="legacy",
+        help="Agent execution mode. `legacy` keeps the old preprocess-only agent; "
+             "`runtime` enables the new planning/tool/workspace/critic runtime.",
+    )
+    parser.add_argument(
+        "--agent_max_repair_rounds",
+        type=int,
+        default=2,
+        help="Maximum automatic repair rounds when --agent_mode runtime is used.",
+    )
+    parser.add_argument(
+        "--agent_max_plan_iterations",
+        type=int,
+        default=3,
+        help="Maximum planner iterations when --agent_mode runtime is used.",
+    )
+    parser.add_argument(
+        "--disable_vlm_critic",
+        action="store_true",
+        help="Disable the Gemini-backed final critic in runtime agent mode.",
+    )
+    parser.add_argument(
+        "--disable_input_understanding",
+        action="store_true",
+        help="Disable the optional image-understanding step in runtime agent mode.",
+    )
+    parser.add_argument(
         "--optimized",
         nargs="?",
         const=True,
@@ -253,6 +283,50 @@ def _save_agent_debug_output(
     print(f"Agent debug artifacts saved at: {debug_dir.resolve()}")
 
 
+def _save_runtime_debug_output(
+    debug_dir: Path,
+    input_paths: list[Path],
+    original_prompt: str,
+    runtime_result: Any,
+) -> None:
+    """Persist comprehensive-agent trace artifacts for debugging."""
+    debug_dir.mkdir(parents=True, exist_ok=True)
+
+    snapshot = runtime_result.workspace_snapshot
+    artifact_summaries = snapshot.get("artifacts", {})
+    image_paths: dict[str, str] = {}
+
+    for artifact_id, image in runtime_result.debug_image_artifacts.items():
+        label = artifact_summaries.get(artifact_id, {}).get("label", artifact_id)
+        safe_label = "".join(
+            ch if ch.isalnum() or ch in {"_", "-"} else "_"
+            for ch in label
+        )
+        save_path = debug_dir / f"{artifact_id}_{safe_label}.png"
+        image.save(save_path)
+        image_paths[artifact_id] = str(save_path.resolve())
+
+    metadata = {
+        "input_images": [str(path.resolve()) for path in input_paths],
+        "original_prompt": original_prompt,
+        "final_prompt": runtime_result.final_prompt,
+        "final_status": runtime_result.final_status,
+        "critic_summary": runtime_result.critic_summary,
+        "group_indices": runtime_result.group_indices,
+        "rois": runtime_result.rois,
+        "execution_trace": runtime_result.execution_trace,
+        "plans": runtime_result.plans,
+        "workspace_snapshot": snapshot,
+        "saved_images": image_paths,
+    }
+    metadata_path = debug_dir / "runtime_agent_metadata.json"
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"Runtime agent debug artifacts saved at: {debug_dir.resolve()}")
+
+
 def load_pipeline(args: argparse.Namespace) -> QwenImageEditPlusPipeline:
     """Load FireRed image edit pipeline with optional LoRA / multi-GPU settings."""
     if args.optimized:
@@ -336,15 +410,64 @@ def main() -> None:
     print(f"Loaded {len(images)} image(s).")
 
 
-    # ── Agent: stitch + recaption when needed ──
+    # ── Agent: either legacy preprocess-only mode or runtime closed loop ──
     need_stitch = len(images) > 3
     need_recaption = args.recaption
 
+    if args.agent_mode == "runtime":
+        _apply_gemini_runtime_overrides(args)
+        from agent import (
+            AgentRuntime,
+            AgentRuntimeOptions,
+            FireRedEditConfig,
+            FireRedEditTool,
+        )
+
+        pipeline = load_pipeline(args)
+        print("Pipeline loaded for runtime agent.")
+
+        runtime = AgentRuntime(
+            edit_tool=FireRedEditTool(
+                pipeline,
+                FireRedEditConfig(
+                    num_inference_steps=args.num_inference_steps,
+                    true_cfg_scale=args.true_cfg_scale,
+                    guidance_scale=args.guidance_scale,
+                    negative_prompt=args.negative_prompt,
+                    seed=args.seed,
+                    generator_device=args.generator_device,
+                ),
+            ),
+            verbose=True,
+        )
+        runtime_result = runtime.run(
+            images,
+            prompt,
+            options=AgentRuntimeOptions(
+                enable_recaption=need_recaption or need_stitch,
+                max_repair_rounds=args.agent_max_repair_rounds,
+                max_plan_iterations=args.agent_max_plan_iterations,
+                enable_input_understanding=not args.disable_input_understanding,
+                enable_vlm_critic=not args.disable_vlm_critic,
+            ),
+        )
+        if args.save_agent_debug_dir is not None:
+            _save_runtime_debug_output(
+                args.save_agent_debug_dir,
+                args.input_image,
+                args.prompt,
+                runtime_result,
+            )
+
+        args.output_image.parent.mkdir(parents=True, exist_ok=True)
+        runtime_result.final_images[0].save(args.output_image)
+        print("Runtime agent status:", runtime_result.final_status)
+        print("Image saved at:", args.output_image.resolve())
+        return
 
     if need_stitch or need_recaption:
         _apply_gemini_runtime_overrides(args)
         from agent import AgentPipeline
-
 
         agent = AgentPipeline(verbose=True)
         agent_result = agent.run(
